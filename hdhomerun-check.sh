@@ -16,7 +16,7 @@ if [ $HOSTNAME = "Neuron" ]; then
     hdhomerun_db_data=/mnt/c/users/Michael/hdhomerun_data.csv
 else
     hdhomerun_config_cmd=/usr/bin/hdhomerun_config
-    hdhomerun_db_data=/home/pi/Documents/hdhomerun_data.csv
+    hdhomerun_db_data=/var/www/hdhomerun/hdhomerun_data.csv
 fi
 hdhomerun_id="1075247B"
 hdhomerun_opt_get_tun3_sts="get /tuner3/status"
@@ -44,7 +44,7 @@ fi
 
 # Put the column headers if the file doesn't exist
 if [ ! -f  ${hdhomerun_db_data} ]; then
-    echo "channel,time,quality,strength,symbol" > ${hdhomerun_db_data}
+    echo "channel,name,time,quality,strength,symbol" > ${hdhomerun_db_data}
 fi
 
 # Log all data on the same date/time
