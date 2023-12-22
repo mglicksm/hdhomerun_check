@@ -8,6 +8,7 @@ set -e
 # TODO: Instead of one reading per channel, several readings per channel then average them. 
 #
 # 2023-12-22    Updated for Linux/Pi, added channel names, committed to Git
+#
 
 if [ $HOSTNAME = "Neuron" ]; then
     echo "Running on Neuron"
