@@ -8,6 +8,8 @@ set -e
 # TODO: Instead of one reading per channel, several readings per channel then average them. 
 #
 # 2023-12-22    Updated for Linux/Pi, added channel names, committed to Git
+# 2024-01-03    Loop 3 times for each channel and average the reading
+# 
 #
 
 if [ $HOSTNAME = "Neuron" ]; then
@@ -68,19 +70,43 @@ do
     # Going to do 'none' last so for real channels we want to record signal
     if [ "${chan}" != "none" ]; then
 
-        # Check the status of the tuner
-        # echo "Getting new channel status"
-        rm -f ${hdhomerun_config_tmp}   # We reuse this file name because it's only generated at the top
-        ${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_get_tun3_sts}  >${hdhomerun_config_tmp}
+        sum_ss=0
+        sum_snq=0
+        sum_seq=0
+        mean_ss=0
+        mean_snq=0
+        mean_seq=0
 
-        #cat ${hdhomerun_config_tmp}
-        cur_chan=$(cat ${hdhomerun_config_tmp} | awk '{print $1}' | awk -F "=" '{print $2}' | tr -d \" )
-        cur_ss=$(cat ${hdhomerun_config_tmp} | awk '{print $3}' | awk -F "=" '{print $2}' |tr -d \" )
-        cur_snq=$(cat ${hdhomerun_config_tmp} | awk '{print $4}' | awk -F "=" '{print $2}' |tr -d \" )
-        cur_seq=$(cat ${hdhomerun_config_tmp} | awk '{print $5}' | awk -F "=" '{print $2}' |tr -d \" )
+        for i in $(seq 1 3);
+        do
+            # Check the status of the tuner
+            # echo "Getting new channel status"
+            rm -f ${hdhomerun_config_tmp}   # We reuse this file name because it's only generated at the top
+            ${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_get_tun3_sts}  >${hdhomerun_config_tmp}
+
+            #cat ${hdhomerun_config_tmp}
+            cur_chan=$(cat ${hdhomerun_config_tmp} | awk '{print $1}' | awk -F "=" '{print $2}' | tr -d \" )
+            cur_ss=$(cat ${hdhomerun_config_tmp} | awk '{print $3}' | awk -F "=" '{print $2}' |tr -d \" )
+            cur_snq=$(cat ${hdhomerun_config_tmp} | awk '{print $4}' | awk -F "=" '{print $2}' |tr -d \" )
+            cur_seq=$(cat ${hdhomerun_config_tmp} | awk '{print $5}' | awk -F "=" '{print $2}' |tr -d \" )
+
+            sum_ss=$((sum_ss + cur_ss))
+            sum_snq=$((sum_snq + cur_snq))
+            sum_seq=$((sum_seq + cur_seq))
+
+            sleep 2 # Sleep between reads
+        done
+
+        mean_ss=$(echo "scale=2; 1.0 * $sum_ss / 3" | bc -l)
+        mean_snq=$(echo "scale=2; 1.0 * $sum_snq / 3" | bc -l)
+        mean_seq=$(echo "scale=2; 1.0 * $sum_seq / 3" | bc -l)
+
+        # echo "${cur_chan},${chan_name},${query_date},${sum_snq},${sum_ss},${sum_seq}
+        # echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}
 
         # channel, date/time, quality, strength, sympol
-        echo "${cur_chan},${chan_name},${query_date},${cur_snq},${cur_ss},${cur_seq}" >> ${hdhomerun_db_data}
+        # echo "${cur_chan},${chan_name},${query_date},${cur_snq},${cur_ss},${cur_seq}" >> ${hdhomerun_db_data}
+        echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}" >> ${hdhomerun_db_data}
     fi
 done
 
