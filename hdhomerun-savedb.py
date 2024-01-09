@@ -3,6 +3,7 @@ import json
 # from influxdb_client import InfluxDBClient, Point, WritePrecision
 # from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb import InfluxDBClient
+from datetime import datetime
 
 # Ensure correct usage
 if len(sys.argv) != 8:
@@ -12,16 +13,23 @@ if len(sys.argv) != 8:
 
 # print("args are " + sys.argv[0] + " 1=" + sys.argv[1] + " 2=" + sys.argv[2] + " 3=" + sys.argv[3] + " 4=" + sys.argv[4] + " 5=" + sys.argv[5] + " 6=" + sys.argv[6] + " 7=" + sys.argv[7])
 
-
 # Extract arguments
 channel, name, query_date, query_time, signal_quality, signal_strength, symbol_quality = sys.argv[1:8]
 # Convert arguments to a JSON object
+
+
+time_string = query_date + " " + query_time
+format = "%Y-%m-%d %H:%M:%S"
+
+converted_datetime = datetime.strptime(time_string, format)
+
 antenna_data = [
     {
         "measurement" : "antenna_signal",
         "tags" : {
             "host": "Slam"
         },
+        "time": converted_datetime,
         "fields" : {
             "channel": channel,
             "name": name, 
