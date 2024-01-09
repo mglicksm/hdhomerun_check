@@ -35,11 +35,10 @@ antenna_data = [
         "tags" : {
             "host": "Slam"
         },
-        "time": utc_time,
         "fields" : {
             "channel": channel,
             "name": name, 
-            "query_time": query_date + " " + query_time,
+            "query_time": utc_time,
             "signal_quality": float(signal_quality),
             "signal_strength": float(signal_strength),
             "symbol_quality": float(symbol_quality)
