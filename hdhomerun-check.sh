@@ -9,6 +9,7 @@ set -e
 #
 # 2023-12-22    Updated for Linux/Pi, added channel names, committed to Git
 # 2024-01-03    Loop 3 times for each channel and average the reading
+# 2024-01-09    Increased to sleep 5 seconds during the loop, between reads of a channel
 # 
 #
 
@@ -81,6 +82,7 @@ do
         do
             # Check the status of the tuner
             # echo "Getting new channel status"
+            sleep 5 # Sleep between reads
             rm -f ${hdhomerun_config_tmp}   # We reuse this file name because it's only generated at the top
             ${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_get_tun3_sts}  >${hdhomerun_config_tmp}
 
@@ -94,7 +96,6 @@ do
             sum_snq=$((sum_snq + cur_snq))
             sum_seq=$((sum_seq + cur_seq))
 
-            sleep 2 # Sleep between reads
         done
 
         mean_ss=$(echo "scale=2; 1.0 * $sum_ss / 3" | bc -l)
