@@ -4,6 +4,7 @@ import json
 # from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb import InfluxDBClient
 from datetime import datetime
+import pytz
 
 # Ensure correct usage
 if len(sys.argv) != 8:
@@ -21,7 +22,14 @@ channel, name, query_date, query_time, signal_quality, signal_strength, symbol_q
 time_string = query_date + " " + query_time
 format = "%Y-%m-%d %H:%M:%S"
 
-converted_datetime = datetime.strptime(time_string, format)
+# converted_datetime = datetime.strptime(time_string, format)
+
+# Parse the time string into a datetime object assuming it's in EST
+est = pytz.timezone('US/Eastern')
+est_time = est.localize(datetime.strptime(time_string, format))
+
+# Convert to UTC
+utc_time = est_time.astimezone(pytz.utc)
 
 antenna_data = [
     {
@@ -29,7 +37,7 @@ antenna_data = [
         "tags" : {
             "host": "Slam"
         },
-        "time": converted_datetime,
+        "time": utc_time,
         "fields" : {
             "channel": channel,
             "name": name, 
