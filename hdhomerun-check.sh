@@ -105,9 +105,14 @@ do
         # echo "${cur_chan},${chan_name},${query_date},${sum_snq},${sum_ss},${sum_seq}
         # echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}
 
-        # channel, date/time, quality, strength, sympol
+        # channel, name, date/time, quality, strength, symbol
         # echo "${cur_chan},${chan_name},${query_date},${cur_snq},${cur_ss},${cur_seq}" >> ${hdhomerun_db_data}
+        echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}"
         echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}" >> ${hdhomerun_db_data}
+
+        if [ $HOSTNAME != "Neuron" ]; then
+            python3 hdhomerun-savedb.py ${cur_chan} ${chan_name} ${mean_snq} ${mean_ss} ${mean_seq}
+        fi
     fi
 done
 
