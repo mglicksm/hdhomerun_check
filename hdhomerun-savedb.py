@@ -14,7 +14,7 @@ print("args are " + sys.argv[0] + " 1=" + sys.argv[1] + " 2=" + sys.argv[2] + " 
 
 
 # Extract arguments
-channel, name, query_date, query_time, signal_quality, signal_strength, symbol_quality = sys.argv[1:7]
+channel, name, query_date, query_time, signal_quality, signal_strength, symbol_quality = sys.argv[1:8]
 # Convert arguments to a JSON object
 antenna_data = [
     {
