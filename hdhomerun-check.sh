@@ -111,7 +111,7 @@ do
         echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}" >> ${hdhomerun_db_data}
 
         if [ $HOSTNAME != "Neuron" ]; then
-            python3 hdhomerun-savedb.py ${cur_chan} ${chan_name} ${mean_snq} ${mean_ss} ${mean_seq}
+            python3 hdhomerun-savedb.py ${cur_chan} ${chan_name} ${query_date} ${mean_snq} ${mean_ss} ${mean_seq}
         fi
     fi
 done
