@@ -16,13 +16,10 @@ if len(sys.argv) != 8:
 
 # Extract arguments
 channel, name, query_date, query_time, signal_quality, signal_strength, symbol_quality = sys.argv[1:8]
-# Convert arguments to a JSON object
 
-
+# convert the input time to a python time
 time_string = query_date + " " + query_time
 format = "%Y-%m-%d %H:%M:%S"
-
-# converted_datetime = datetime.strptime(time_string, format)
 
 # Parse the time string into a datetime object assuming it's in EST
 est = pytz.timezone('US/Eastern')
@@ -31,6 +28,7 @@ est_time = est.localize(datetime.strptime(time_string, format))
 # Convert to UTC
 utc_time = est_time.astimezone(pytz.utc)
 
+# Convert arguments to a JSON object
 antenna_data = [
     {
         "measurement" : "antenna_signal",
