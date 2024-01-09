@@ -5,7 +5,7 @@ import json
 from influxdb import InfluxDBClient
 
 # Ensure correct usage
-if len(sys.argv) != 6:
+if len(sys.argv) != 7:
     print("Usage: python3 hdhomerun-savedb.py <channel> <channel name> <time> <signal_strength> <signal_quality> <symbol_quality>")
     sys.exit(1)
 
