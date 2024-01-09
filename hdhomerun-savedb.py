@@ -10,7 +10,7 @@ if len(sys.argv) != 8:
     print()
     sys.exit(1)
 
-print(sys.argv)
+print("args are " + sys.argv)
 
 
 # Extract arguments
