@@ -7,6 +7,7 @@ from influxdb import InfluxDBClient
 # Ensure correct usage
 if len(sys.argv) != 7:
     print("Usage: python3 hdhomerun-savedb.py <channel> <channel name> <time> <signal_strength> <signal_quality> <symbol_quality>")
+    print()
     sys.exit(1)
 
 # Extract arguments
