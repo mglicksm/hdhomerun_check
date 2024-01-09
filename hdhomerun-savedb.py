@@ -10,9 +10,11 @@ if len(sys.argv) != 8:
     print()
     sys.exit(1)
 
+print(sys.argv)
+
+
 # Extract arguments
 channel, name, query_date, query_time, signal_quality, signal_strength, symbol_quality = sys.argv[1:7]
-print(sys.argv)
 # Convert arguments to a JSON object
 antenna_data = [
     {
