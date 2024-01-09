@@ -107,7 +107,8 @@ do
 
         # channel, name, date/time, quality, strength, symbol
         # echo "${cur_chan},${chan_name},${query_date},${cur_snq},${cur_ss},${cur_seq}" >> ${hdhomerun_db_data}
-        echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}"
+
+        # echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}"
         echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}" >> ${hdhomerun_db_data}
 
         if [ $HOSTNAME != "Neuron" ]; then
