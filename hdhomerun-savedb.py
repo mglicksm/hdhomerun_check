@@ -6,12 +6,12 @@ from influxdb import InfluxDBClient
 
 # Ensure correct usage
 if len(sys.argv) != 7:
-    print("Usage: python3 hdhomerun-savedb.py <channel> <channel name> <time> <signal_strength> <signal_quality> <symbol_quality>")
+    print("Usage: python3 hdhomerun-savedb.py <channel> <channel name> <date> <time> <signal_strength> <signal_quality> <symbol_quality>")
     print()
     sys.exit(1)
 
 # Extract arguments
-channel, name, time, signal_quality, signal_strength, symbol_quality = sys.argv[1:6]
+channel, name, query_date, query_time, signal_quality, signal_strength, symbol_quality = sys.argv[1:7]
 
 # Convert arguments to a JSON object
 antenna_data = [
@@ -23,7 +23,7 @@ antenna_data = [
         "fields" : {
             "channel": channel,
             "name": name, 
-            "time": time,
+            "time": query_date + " " + query_time,
             "signal_quality": float(signal_quality),
             "signal_strength": float(signal_strength),
             "symbol_quality": float(symbol_quality)
