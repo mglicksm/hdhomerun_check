@@ -25,7 +25,7 @@ antenna_data = [
         "fields" : {
             "channel": channel,
             "name": name, 
-            "time": query_date + " " + query_time,
+            "query_time": query_date + " " + query_time,
             "signal_quality": float(signal_quality),
             "signal_strength": float(signal_strength),
             "symbol_quality": float(symbol_quality)
