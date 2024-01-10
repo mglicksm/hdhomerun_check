@@ -18,12 +18,12 @@ if [ $HOSTNAME = "Neuron" ]; then
     hdhomerun_config_cmd=/mnt/d/users/Michael/Programs/SiliconDust/HDHomeRun/hdhomerun_config.exe
     hdhomerun_db_data=/mnt/c/users/Michael/hdhomerun_data.csv
     python_exe=/usr/bin/python3
-    db_script=/mnt/c/users/Michael/Documents/github/hdhomerun_check/hdhomerun-check.py
+    db_script=/mnt/c/users/Michael/Documents/github/hdhomerun_check/hdhomerun-savedb.py
 else
     hdhomerun_config_cmd=/usr/bin/hdhomerun_config
     hdhomerun_db_data=/var/www/hdhomerun/hdhomerun_data.csv
     python_exe=/usr/bin/python3
-    db_script=/home/pi/Documents/github/hdhomerun_check/hdhomerun-check.py
+    db_script=/home/pi/Documents/github/hdhomerun_check/hdhomerun-savedb.py
 fi
 hdhomerun_id="1075247B"
 hdhomerun_opt_get_tun3_sts="get /tuner3/status"
