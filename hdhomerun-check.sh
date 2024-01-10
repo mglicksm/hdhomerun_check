@@ -10,6 +10,7 @@ set -e
 # 2023-12-22    Updated for Linux/Pi, added channel names, committed to Git
 # 2024-01-03    Loop 3 times for each channel and average the reading
 # 2024-01-09    Increased to sleep 5 seconds during the loop, between reads of a channel
+# 2024-01-10    Added InfluxDB support
 # 
 #
 
