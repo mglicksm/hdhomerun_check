@@ -17,7 +17,7 @@ if [ $HOSTNAME = "Neuron" ]; then
     echo "Running on Neuron"
     hdhomerun_config_cmd=/mnt/d/users/Michael/Programs/SiliconDust/HDHomeRun/hdhomerun_config.exe
     hdhomerun_db_data=/mnt/c/users/Michael/hdhomerun_data.csv
-    python_exe=/usr/bin/python3
+    python_exe=/usr/bin/python3  # TODO - Needs something real, but not used either
     db_script=/mnt/c/users/Michael/Documents/github/hdhomerun_check/hdhomerun-savedb.py
 else
     hdhomerun_config_cmd=/usr/bin/hdhomerun_config
