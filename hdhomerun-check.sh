@@ -17,9 +17,13 @@ if [ $HOSTNAME = "Neuron" ]; then
     echo "Running on Neuron"
     hdhomerun_config_cmd=/mnt/d/users/Michael/Programs/SiliconDust/HDHomeRun/hdhomerun_config.exe
     hdhomerun_db_data=/mnt/c/users/Michael/hdhomerun_data.csv
+    python_exe=/usr/bin/python3
+    db_script=/mnt/c/users/Michael/Documents/github/hdhomerun_check/hdhomerun-check.py
 else
     hdhomerun_config_cmd=/usr/bin/hdhomerun_config
     hdhomerun_db_data=/var/www/hdhomerun/hdhomerun_data.csv
+    python_exe=/usr/bin/python3
+    db_script=/home/pi/Documents/github/hdhomerun_check/hdhomerun-check.py
 fi
 hdhomerun_id="1075247B"
 hdhomerun_opt_get_tun3_sts="get /tuner3/status"
@@ -112,7 +116,7 @@ do
         echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}" >> ${hdhomerun_db_data}
 
         if [ $HOSTNAME != "Neuron" ]; then
-            python3 hdhomerun-savedb.py ${cur_chan} ${chan_name} ${query_date} ${mean_snq} ${mean_ss} ${mean_seq}
+            ${python_exe} ${db_script} ${cur_chan} ${chan_name} ${query_date} ${mean_snq} ${mean_ss} ${mean_seq}
         fi
     fi
 done
