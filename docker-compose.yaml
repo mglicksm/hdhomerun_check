@@ -15,7 +15,6 @@ services:
     build: .
     container_name: hdhomerun-monitor
     # This allows the build/run process to bypass the old security library
-    privileged: true    
     depends_on:
       - influxdb
     environment:
