@@ -14,9 +14,8 @@ services:
   hdhomerun-app:
     build: .
     container_name: hdhomerun-monitor
-    # This line tells the Pi to stop blocking modern system calls
-    security_opt:
-      - seccomp:unconfined
+    # This allows the build/run process to bypass the old security library
+    privileged: true    
     depends_on:
       - influxdb
     environment:
