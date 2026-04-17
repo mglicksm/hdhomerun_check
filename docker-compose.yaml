@@ -5,7 +5,7 @@ services:
     image: influxdb:1.8
     container_name: influxdb
     ports:
-      - "8086:8086"
+      - "8087:8086"
     volumes:
       - /home/pi/hdhomerun/influx_data:/var/lib/influxdb
       - /home/pi/hdhomerun/backups:/backups
