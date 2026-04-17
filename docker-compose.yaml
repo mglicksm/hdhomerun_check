@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    volumes:
+      - /home/pi/hdhomerun/influx_data:/var/lib/influxdb
+      - /home/pi/hdhomerun/backups:/backups
+    restart: always
+
+  hdhomerun-app:
+    build: .
+    container_name: hdhomerun-monitor
+    depends_on:
+      - influxdb
+    environment:
+      - HDHOMERUN_ID=1075247B
+      - HDHOMERUN_TUNER=tuner3
+      - INFLUX_HOST=influxdb
+    volumes:
+      - /home/pi/hdhomerun/data:/data
+    restart: always

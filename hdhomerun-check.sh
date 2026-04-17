@@ -11,87 +11,73 @@ set -e
 # 2024-01-03    Loop 3 times for each channel and average the reading
 # 2024-01-09    Increased to sleep 5 seconds during the loop, between reads of a channel
 # 2024-01-10    Added InfluxDB support
+# 2026-04-17    Make it run in docker
 # 
-#
 
-if [ $HOSTNAME = "Neuron" ]; then
-    echo "Running on Neuron"
-    hdhomerun_config_cmd=/mnt/d/users/Michael/Programs/SiliconDust/HDHomeRun/hdhomerun_config.exe
-    hdhomerun_db_data=/mnt/c/users/Michael/hdhomerun_data.csv
-    python_exe=/usr/bin/python3  # TODO - Needs something real, but not used either
-    db_script=/mnt/c/users/Michael/Documents/github/hdhomerun_check/hdhomerun-savedb.py
-else
-    hdhomerun_config_cmd=/usr/bin/hdhomerun_config
-    hdhomerun_db_data=/var/www/hdhomerun/hdhomerun_data.csv
-    python_exe=/usr/bin/python3
-    db_script=/home/pi/Documents/github/hdhomerun_check/hdhomerun-savedb.py
-fi
-hdhomerun_id="1075247B"
-hdhomerun_opt_get_tun3_sts="get /tuner3/status"
-hdhomerun_opt_set_tun3="set /tuner3/channel "
+# Updated for Dockerized Home Lab Environment
+# Uses Environment Variables for ID and Tuner selection
+
+# Use Environment Variables with defaults if not provided
+hdhomerun_id=${HDHOMERUN_ID:-"1075247B"}
+tuner=${HDHOMERUN_TUNER:-"tuner3"}
+
+# Internal container paths
+hdhomerun_config_cmd=/usr/bin/hdhomerun_config
+hdhomerun_db_data=/data/hdhomerun_data.csv
+python_exe=/usr/local/bin/python3
+db_script=/app/hdhomerun-savedb.py
+
+# Dynamic options based on chosen tuner
+hdhomerun_opt_get_tun_sts="get /${tuner}/status"
+hdhomerun_opt_set_tun="set /${tuner}/channel "
+
+# Channels to monitor
 channel_array=(auto:11 auto:12 auto:21 auto:26 auto:27 auto:31 none)
 channel_name_array=("13.1" "11.1" "22.1" "45.1" "2.1" "26.1" none)
-
-# echo "HDHomeRun check begins"
 
 # Create a temp file for config output
 hdhomerun_config_tmp=$(mktemp --tmpdir=/tmp --suffix=.tmp hdhomerun_XXXXXX)
 trap "rm -rf ${hdhomerun_config_tmp}" EXIT
 
-# Get tuner status, should be none to start
-# echo "About to run ${hdhomerun_config_cmd} to file ${hdhomerun_config_tmp}"
-${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_get_tun3_sts}  >${hdhomerun_config_tmp}
-
+# Verify tuner is available (should be 'none')
+${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_get_tun_sts} >${hdhomerun_config_tmp}
 cur_chan=$(cat ${hdhomerun_config_tmp} | awk '{print $1}'| awk -F "=" '{print $2}' |tr -d \" )
 
-# Check if channel is none and exit if not
 if [ "${cur_chan}" != "none" ]; then
-    echo "The channel is set to ${cur_chan}, exiting 1"    
+    echo "Tuner ${tuner} is currently set to ${cur_chan}, exiting to avoid interrupting recording."    
     exit 1
 fi
 
-# Put the column headers if the file doesn't exist
+# Initialize CSV headers if file is new
 if [ ! -f  ${hdhomerun_db_data} ]; then
     echo "channel,name,time,quality,strength,symbol" > ${hdhomerun_db_data}
 fi
 
-# Log all data on the same date/time
 query_date=$(date '+%Y-%m-%d %H:%M:%S')
-
 name_idx=0
 
 for chan in "${channel_array[@]}"
 do
-    # proceed to set the tuner
-    #echo "The channel is none"
-    #echo "Setting a channel, but no output"
-    #echo "Setting to channel ${chan}"
-    ${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_set_tun3} ${chan}
+    # Set the tuner to the target channel
+    ${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_set_tun} ${chan}
 
     chan_name=${channel_name_array[name_idx]}
     name_idx=$((name_idx+1))
 
-    sleep 3 # No valid signal strength until we sleep
+    # Wait for signal lock
+    sleep 3 
 
-    # Going to do 'none' last so for real channels we want to record signal
     if [ "${chan}" != "none" ]; then
-
         sum_ss=0
         sum_snq=0
         sum_seq=0
-        mean_ss=0
-        mean_snq=0
-        mean_seq=0
 
+        # Loop 3 times and average for better accuracy
         for i in $(seq 1 3);
         do
-            # Check the status of the tuner
-            # echo "Getting new channel status"
-            sleep 5 # Sleep between reads
-            rm -f ${hdhomerun_config_tmp}   # We reuse this file name because it's only generated at the top
-            ${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_get_tun3_sts}  >${hdhomerun_config_tmp}
+            sleep 5 
+            ${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_get_tun_sts} >${hdhomerun_config_tmp}
 
-            #cat ${hdhomerun_config_tmp}
             cur_chan=$(cat ${hdhomerun_config_tmp} | awk '{print $1}' | awk -F "=" '{print $2}' | tr -d \" )
             cur_ss=$(cat ${hdhomerun_config_tmp} | awk '{print $3}' | awk -F "=" '{print $2}' |tr -d \" )
             cur_snq=$(cat ${hdhomerun_config_tmp} | awk '{print $4}' | awk -F "=" '{print $2}' |tr -d \" )
@@ -100,40 +86,22 @@ do
             sum_ss=$((sum_ss + cur_ss))
             sum_snq=$((sum_snq + cur_snq))
             sum_seq=$((sum_seq + cur_seq))
-
         done
 
+        # Calculate means using bc
         mean_ss=$(echo "scale=2; 1.0 * $sum_ss / 3" | bc -l)
         mean_snq=$(echo "scale=2; 1.0 * $sum_snq / 3" | bc -l)
         mean_seq=$(echo "scale=2; 1.0 * $sum_seq / 3" | bc -l)
 
-        # echo "${cur_chan},${chan_name},${query_date},${sum_snq},${sum_ss},${sum_seq}
-        # echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}
-
-        # channel, name, date/time, quality, strength, symbol
-        # echo "${cur_chan},${chan_name},${query_date},${cur_snq},${cur_ss},${cur_seq}" >> ${hdhomerun_db_data}
-
-        # echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}"
+        # Write to local CSV
         echo "${cur_chan},${chan_name},${query_date},${mean_snq},${mean_ss},${mean_seq}" >> ${hdhomerun_db_data}
 
-        if [ $HOSTNAME != "Neuron" ]; then
-            ${python_exe} ${db_script} ${cur_chan} ${chan_name} ${query_date} ${mean_snq} ${mean_ss} ${mean_seq}
-        fi
+        # Push to InfluxDB via Python script
+        ${python_exe} ${db_script} ${cur_chan} ${chan_name} ${query_date} ${mean_snq} ${mean_ss} ${mean_seq}
     fi
 done
 
-# Check that it is none again 
-rm -f ${hdhomerun_config_tmp}   # We reuse this file name because it's only generated at the top
-${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_get_tun3_sts}  >${hdhomerun_config_tmp}
+# Ensure tuner is released
+${hdhomerun_config_cmd} ${hdhomerun_id} ${hdhomerun_opt_set_tun} none
 
-cur_chan=$(cat ${hdhomerun_config_tmp} | awk '{print $1}' | awk -F "=" '{print $2}' |tr -d \" )
-rm -f ${hdhomerun_config_tmp}
-
-# Check if channel is none and exit if not
-if [ "${cur_chan}" != "none" ]; then
-    echo "The channel is set to ${cur_chan} when it should be none, exiting 1"    
-    exit 1
-fi
-
-#rm -f ${hdhomerun_config_tmp}
 exit 0
